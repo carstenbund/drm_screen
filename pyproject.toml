@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "drm-screen"
+version = "0.1.0"
+description = "Stateful screen manager: persistent layers, compositing, and output to drm-display"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+dependencies = ["numpy", "drm-display"]
+keywords = ["drm", "kms", "display", "layers", "compositor", "embedded"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Topic :: Multimedia :: Graphics",
+]
+
+[project.optional-dependencies]
+assets = ["pillow"]
+
+[project.urls]
+Homepage = "https://github.com/carstenbund/drm_screen"
+Repository = "https://github.com/carstenbund/drm_screen"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["drm_screen*"]
