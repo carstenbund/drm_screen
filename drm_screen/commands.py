@@ -30,6 +30,8 @@ class CreateLayer:
     z: int = 0
     visible: bool = True
     opacity: float = 1.0
+    interactive: bool = False
+    hit_id: str | None = None
 
 
 @dataclass
@@ -84,6 +86,49 @@ class PlaceRawBuffer:
         )
 
 
+@dataclass
+class SetInteractive:
+    """Mark a layer as hit-testable and give it an id for hit_test()."""
+    name: str
+    interactive: bool = True
+    hit_id: str | None = None
+
+
+@dataclass
+class SetPointer:
+    """Move (and show/hide) the autonomous pointer cursor overlay.
+
+    Fed straight to drm_screen's render queue by drm_touch — the INT 33h-style
+    cursor that tracks the contact smoothly, independent of the app loop.
+    """
+    x: int
+    y: int
+    visible: bool = True
+
+
+# Reserved pointer overlay — sits above everything; never hit-tested.
+_POINTER_NAME = "__pointer__"
+_POINTER_Z = 1_000_000
+_CURSOR_R = 11
+
+
+def default_cursor() -> np.ndarray:
+    """A simple white ring + red centre dot; hotspot at its centre."""
+    s = _CURSOR_R * 2 + 3
+    yy, xx = np.ogrid[:s, :s]
+    c = s // 2
+    dist = np.sqrt((xx - c) ** 2 + (yy - c) ** 2)
+    img = np.zeros((s, s, 4), dtype=np.uint8)
+    img[(dist >= _CURSOR_R - 1.5) & (dist <= _CURSOR_R + 0.5)] = (255, 255, 255, 255)
+    img[dist <= 2.0] = (255, 80, 80, 255)
+    return img
+
+
+def _cursor_hotspot() -> tuple[int, int]:
+    c = (_CURSOR_R * 2 + 3) // 2
+    return c, c
+
+
 # ── dispatcher (render-thread side) ───────────────────────────────────────────
 
 def apply_command(composer: Composer, cmd) -> None:
@@ -92,6 +137,7 @@ def apply_command(composer: Composer, cmd) -> None:
         composer.add_layer(Layer(
             name=cmd.name, width=cmd.width, height=cmd.height,
             x=cmd.x, y=cmd.y, z=cmd.z, visible=cmd.visible, opacity=cmd.opacity,
+            interactive=cmd.interactive, hit_id=cmd.hit_id,
         ))
     elif isinstance(cmd, DeleteLayer):
         composer.remove_layer(cmd.name)
@@ -108,6 +154,21 @@ def apply_command(composer: Composer, cmd) -> None:
         composer.get(cmd.name).z = cmd.z
     elif isinstance(cmd, PlaceRawBuffer):
         composer.get(cmd.name).blit(cmd.to_array(), cmd.x, cmd.y)
+    elif isinstance(cmd, SetInteractive):
+        layer = composer.get(cmd.name)
+        layer.interactive = cmd.interactive
+        layer.hit_id = cmd.hit_id
+    elif isinstance(cmd, SetPointer):
+        if _POINTER_NAME not in composer.layers:
+            cur = default_cursor()
+            h, w = cur.shape[:2]
+            composer.add_layer(Layer(_POINTER_NAME, w, h, z=_POINTER_Z,
+                                     visible=cmd.visible))
+            composer.get(_POINTER_NAME).blit(cur, 0, 0)
+        hx, hy = _cursor_hotspot()
+        layer = composer.get(_POINTER_NAME)
+        layer.x, layer.y = cmd.x - hx, cmd.y - hy
+        layer.visible = cmd.visible
     else:
         raise TypeError(f"unknown command {cmd!r}")
 
@@ -116,7 +177,7 @@ def apply_command(composer: Composer, cmd) -> None:
 
 _KINDS = {c.__name__: c for c in (
     CreateLayer, DeleteLayer, ClearLayer, ShowLayer, HideLayer,
-    SetPosition, SetZ, PlaceRawBuffer,
+    SetPosition, SetZ, PlaceRawBuffer, SetInteractive, SetPointer,
 )}
 
 

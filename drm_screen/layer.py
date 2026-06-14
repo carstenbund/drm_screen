@@ -20,6 +20,8 @@ class Layer:
     z: int = 0
     visible: bool = True
     opacity: float = 1.0
+    interactive: bool = False         # eligible for hit-testing
+    hit_id: str | None = None         # id returned by Composer.hit_test
     buffer: np.ndarray | None = None  # RGBA, shape (height, width, 4)
 
     def clear(self):

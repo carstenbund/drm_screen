@@ -23,12 +23,18 @@ class ScreenService:
         self.dirty = True
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
+        self._lock = threading.Lock()   # guards layer state (render vs hit_test)
 
     # ── client-facing, non-blocking ──────────────────────────────────────────
 
     def submit(self, commands) -> None:
         """Enqueue a batch of command records. Returns immediately."""
         self.queue.put(list(commands))
+
+    def hit_test(self, x: int, y: int) -> str | None:
+        """Thread-safe topmost-interactive-layer query (called from app thread)."""
+        with self._lock:
+            return self.composer.hit_test(x, y)
 
     # ── render thread internals ──────────────────────────────────────────────
 
@@ -43,11 +49,12 @@ class ScreenService:
             self.dirty = True
 
     def render_once(self) -> None:
-        self._drain()
-        if self.dirty:
-            frame = self.composer.render()
-            self.backend.write(frame)
-            self.dirty = False
+        with self._lock:
+            self._drain()
+            if self.dirty:
+                frame = self.composer.render()
+                self.backend.write(frame)
+                self.dirty = False
 
     def _run(self) -> None:
         interval = 1.0 / self.fps

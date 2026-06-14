@@ -30,6 +30,22 @@ class Composer:
     def get(self, name: str) -> Layer:
         return self.layers[name]
 
+    # ── hit-testing (pure read-only query: which region is under a point) ─────
+
+    def hit_test(self, x: int, y: int) -> str | None:
+        """Topmost interactive layer covering (x, y) -> its hit_id, else None.
+
+        Walk layers top-down by z; the first visible, interactive layer whose
+        bounds contain the point wins. Mutates nothing.
+        """
+        for layer in sorted(self.layers.values(), key=lambda l: l.z, reverse=True):
+            if not layer.visible or not layer.interactive:
+                continue
+            if (layer.x <= x < layer.x + layer.width
+                    and layer.y <= y < layer.y + layer.height):
+                return layer.hit_id
+        return None
+
     # ── composition (pure: layers -> canvas) ──────────────────────────────────
 
     def render(self) -> np.ndarray:

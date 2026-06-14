@@ -13,7 +13,8 @@
 #   make clean         - remove build artifacts
 #   make info          - show package name + version
 
-PY ?= python3
+# Prefer the stack venv (which has build + twine); fall back to system python3.
+PY ?= $(firstword $(wildcard ../.venv/bin/python3) python3)
 
 .PHONY: build check publish publish-test clean info
 
