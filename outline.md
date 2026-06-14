@@ -1,8 +1,8 @@
-# drm-screen — outline
+# drm_screen — outline
 
 `drm_screen` is the **stateful screen manager**. It owns persistent layer
 buffers, composites them into a single frame, and pushes that frame to
-`drm-display`.
+`drm_display`.
 
 It does **not** parse HTML, resolve layout, or rasterize text/shapes — that is
 `drm_composer`'s job. It does **not** talk to DRM/KMS — that is `drm-display`'s
