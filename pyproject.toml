@@ -8,7 +8,9 @@ version = "0.1.0"
 description = "Layer-based screen manager for Raspberry Pi and embedded Linux: persistent layers, compositing, and output to DRM/KMS"
 readme = "README.md"
 requires-python = ">=3.10"
-license = "MIT"
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE", "NOTICE", "THIRD_PARTY_LICENSES.md"]
+authors = [{ name = "Carsten Bund", email = "carstenbund@gmail.com" }]
 dependencies = ["numpy", "drm-display"]
 keywords = [
     "drm", "kms", "display", "framebuffer", "layers", "compositor",
