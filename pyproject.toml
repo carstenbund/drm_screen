@@ -5,18 +5,22 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "drm-screen"
 version = "0.1.0"
-description = "Stateful screen manager: persistent layers, compositing, and output to drm-display"
+description = "Layer-based screen manager for Raspberry Pi and embedded Linux: persistent layers, compositing, and output to DRM/KMS"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 dependencies = ["numpy", "drm-display"]
-keywords = ["drm", "kms", "display", "layers", "compositor", "embedded"]
+keywords = [
+    "drm", "kms", "display", "framebuffer", "layers", "compositor",
+    "raspberry-pi", "raspberrypi", "embedded", "sbc", "kiosk", "linux",
+]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3",
     "Topic :: Multimedia :: Graphics",
+    "Topic :: System :: Hardware",
 ]
 
 [project.optional-dependencies]

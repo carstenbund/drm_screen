@@ -11,6 +11,12 @@ from .service import ScreenService
 from .target import InProcessTarget, SocketTarget
 from . import commands
 
+from importlib.metadata import version, PackageNotFoundError
+try:
+    __version__ = version("drm-screen")
+except PackageNotFoundError:
+    __version__ = "unknown"
+
 __all__ = [
     "Layer",
     "Composer",
@@ -19,4 +25,5 @@ __all__ = [
     "InProcessTarget",
     "SocketTarget",
     "commands",
+    "__version__",
 ]
