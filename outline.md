@@ -43,6 +43,21 @@ unit. Typical layers:
 - `debug` — fps / network diagnostics
 - `modal` — temporary dialogs
 
+## Who draws
+
+Layer state, the command API, hit-testing and the service loop are this
+package's job and do not move. **Composition is a plugin point.** The built-in
+`rgba` renderer is the numpy blend described above; a renderer plugin can hold
+the same layers some other way and present them itself.
+
+That distinction is what keeps the colour convention below true of `drm_screen`
+rather than of every renderer: RGBA is the language of the *commands*. A
+renderer that never forms an RGBA frame at all (LVGL compositing into its own
+dirty rectangles, straight to DRM/KMS) is still correct, as long as a bitmap
+handed to it in RGBA arrives on the panel looking the way it would have.
+
+See [docs/renderers.md](docs/renderers.md).
+
 ## Color convention
 
 All layer buffers are **RGBA** `uint8`, shape `(h, w, 4)`. This matches PIL /

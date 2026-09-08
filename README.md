@@ -16,12 +16,33 @@ drm_composer  →  drm_screen  →  drm_display
 - Z-ordered alpha composition → one canvas
 - Exposes the command API that `drm_composer` targets
 - Dirty-flagged render loop
+- Chooses a **renderer**: numpy by default, a plugin where the platform has one
 
 All buffers are **RGBA**; the single RGBA→BGRA conversion happens in the backend
 adapter just before `drm_display`. It does **not** parse HTML and does **not**
 touch DRM/KMS.
 
 See [outline.md](outline.md) for the design.
+
+## Renderers
+
+Composition is a choice now, not a fact. The numpy compositor above is the
+default and needs nothing extra; a plugin can take over the same layers and the
+same commands where a platform can do better:
+
+| Renderer | Where it comes from | What it adds |
+|---|---|---|
+| `rgba` | built in | works anywhere numpy does |
+| `lvgl` | [`drm-screen-lvgl`](https://github.com/carstenbund/drm_screen_lvgl) | draws only what changed; presents straight to DRM/KMS; layers can hold **scenes** — paths drawn at panel resolution, animated against a clock, never rasterised |
+
+```python
+ScreenService(backend)              # unchanged — the numpy compositor
+ScreenService(renderer="lvgl")      # installed plugin, same commands
+DRM_SCREEN_RENDERER=lvgl python app.py    # an existing app, no code change
+```
+
+See [docs/renderers.md](docs/renderers.md) for the protocol, the capability
+list, and how to write one.
 
 ## Install
 

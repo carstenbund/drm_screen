@@ -9,6 +9,7 @@ from .composer import Composer
 from .backend import DrmDisplayBackend
 from .service import ScreenService
 from .target import InProcessTarget, SocketTarget
+from .renderers import Renderer, RgbaRenderer, available, get_renderer
 from . import commands
 
 from importlib.metadata import version, PackageNotFoundError
@@ -19,6 +20,10 @@ except PackageNotFoundError:
 
 __all__ = [
     "Layer",
+    "Renderer",
+    "RgbaRenderer",
+    "available",
+    "get_renderer",
     "Composer",
     "DrmDisplayBackend",
     "ScreenService",

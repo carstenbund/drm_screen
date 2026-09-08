@@ -87,6 +87,29 @@ class PlaceRawBuffer:
 
 
 @dataclass
+class PlaceScene:
+    """Give a layer a scene description instead of a bitmap.
+
+    The layer is then drawn from primitives -- paths, strokes, transforms --
+    at the panel's own resolution, every time the screen is presented, and
+    never becomes a buffer that has to be carried anywhere. Only a renderer
+    declaring the `scene` capability can honour this; the RGBA path refuses it,
+    because by the time content reaches that path it is already pixels.
+    """
+    name: str
+    scene: bytes | str       # a scene document; `fmt` says which dialect
+    fmt: str = "drm_scene_ir/json"
+
+
+@dataclass
+class SetOpacity:
+    """Layer alpha after creation. CreateLayer takes an initial opacity; this
+    is how it changes without rebuilding the layer."""
+    name: str
+    opacity: float
+
+
+@dataclass
 class SetInteractive:
     """Mark a layer as hit-testable and give it an id for hit_test()."""
     name: str
@@ -131,8 +154,20 @@ def _cursor_hotspot() -> tuple[int, int]:
 
 # ── dispatcher (render-thread side) ───────────────────────────────────────────
 
+class UnsupportedCommand(TypeError):
+    """This renderer cannot do what the command asks.
+
+    Raised rather than ignored: a screen that quietly drops a command leaves
+    the client believing something is on the panel that is not.
+    """
+
+
 def apply_command(composer: Composer, cmd) -> None:
-    """Apply one command record to the composer's layer state."""
+    """Apply one command record to the composer's layer state.
+
+    This is the RGBA path's dispatcher. A renderer that keeps layers some other
+    way brings its own -- see `drm_screen.renderers`.
+    """
     if isinstance(cmd, CreateLayer):
         composer.add_layer(Layer(
             name=cmd.name, width=cmd.width, height=cmd.height,
@@ -154,6 +189,14 @@ def apply_command(composer: Composer, cmd) -> None:
         composer.get(cmd.name).z = cmd.z
     elif isinstance(cmd, PlaceRawBuffer):
         composer.get(cmd.name).blit(cmd.to_array(), cmd.x, cmd.y)
+    elif isinstance(cmd, SetOpacity):
+        composer.get(cmd.name).opacity = cmd.opacity
+    elif isinstance(cmd, PlaceScene):
+        raise UnsupportedCommand(
+            "PlaceScene needs a renderer with the 'scene' capability; the RGBA "
+            "compositor carries pixels only. Install a plugin that declares it "
+            "(drm_screen_lvgl) or rasterise the scene before placing it."
+        )
     elif isinstance(cmd, SetInteractive):
         layer = composer.get(cmd.name)
         layer.interactive = cmd.interactive
@@ -177,21 +220,31 @@ def apply_command(composer: Composer, cmd) -> None:
 
 _KINDS = {c.__name__: c for c in (
     CreateLayer, DeleteLayer, ClearLayer, ShowLayer, HideLayer,
-    SetPosition, SetZ, PlaceRawBuffer, SetInteractive, SetPointer,
+    SetPosition, SetZ, SetOpacity, PlaceRawBuffer, PlaceScene,
+    SetInteractive, SetPointer,
 )}
+
+#: Fields that carry bytes and so travel base64-encoded over the wire.
+_BINARY_FIELDS = ("data", "scene")
 
 
 def to_wire(cmd) -> dict:
     d = asdict(cmd)
     d["kind"] = type(cmd).__name__
-    if "data" in d and isinstance(d["data"], (bytes, bytearray)):
-        d["data"] = base64.b64encode(d["data"]).decode("ascii")
+    for field_name in _BINARY_FIELDS:
+        if isinstance(d.get(field_name), (bytes, bytearray)):
+            d[field_name] = base64.b64encode(d[field_name]).decode("ascii")
+            d[f"{field_name}_b64"] = True
     return d
 
 
 def from_wire(d: dict):
     d = dict(d)
     kind = d.pop("kind")
-    if "data" in d and isinstance(d["data"], str):
-        d["data"] = base64.b64decode(d["data"])
+    for field_name in _BINARY_FIELDS:
+        # A scene may legitimately be sent as text, so only decode what was
+        # encoded. Bitmaps predate the flag and are always bytes.
+        encoded = d.pop(f"{field_name}_b64", field_name == "data")
+        if encoded and isinstance(d.get(field_name), str):
+            d[field_name] = base64.b64decode(d[field_name])
     return _KINDS[kind](**d)
