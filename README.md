@@ -66,6 +66,20 @@ Each package installs and runs on its own:
 Full stack, bootstrap, and integration demo:
 [`drm_stack`](https://github.com/carstenbund/drm_stack).
 
+## Changes
+
+```
+0.2.0   Composition became a plugin point: a renderer is chosen rather than
+        assumed, with the numpy compositor still the default and `lvgl` an
+        installable alternative.  PlaceScene lets a layer hold primitives
+        instead of pixels -- the RGBA compositor refuses that command rather
+        than rasterising behind your back, so a missing plugin is an error
+        and not a silently different picture.  Hit-testing and a pointer
+        overlay for touch and mouse input.
+0.1.0   initial -- layers, the RGBA compositor, the service, and the command
+        contract
+```
+
 ## License
 
 **GPL-3.0-or-later** (see [LICENSE](LICENSE)). Use it freely under the GPL. For
