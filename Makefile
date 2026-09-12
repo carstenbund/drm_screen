@@ -13,11 +13,10 @@
 #   make clean         - remove build artifacts
 #   make info          - show package name + version
 
-# Prefer the stack venv (which has build + twine); fall back to system python3.
-# An interpreter that actually has `build` and `twine`. The stack venv first,
-# then a local one, then a sibling project's -- because these are dev tools and
-# where they live varies by machine. `make PY=/path/to/python` overrides.
-VENVS := ../.venv/bin/python3 .venv/bin/python3 ../mementum-lcd/.venv/bin/python3
+# An interpreter that actually has `build` and `twine`: the stack venv first,
+# then a local one, then system python3.  These are dev tools, so where they
+# live varies by machine -- `make PY=/path/to/python` overrides.
+VENVS := ../.venv/bin/python3 .venv/bin/python3
 PY ?= $(firstword $(wildcard $(VENVS)) python3)
 
 # "No module named build" is a poor error for a missing tool, so say it plainly.
