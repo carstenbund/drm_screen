@@ -85,6 +85,10 @@ Full stack, bootstrap, and integration demo:
 ## Changes
 
 ```
+0.2.2   Packaging.  The Author header was empty -- a {name, email} author maps
+        to Author-email alone -- so tools reading Author showed no author at
+        all.  The summary still described 0.1: layers and compositing, no
+        renderers, no scenes, no pointer input.
 0.2.1   Documentation.  PlaceScene needs a renderer with the `scene`
         capability and the README did not say so -- it presented a plugin as
         an upgrade for platforms that can do better, when one command is not

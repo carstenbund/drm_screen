@@ -4,13 +4,19 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "drm-screen"
-version = "0.2.1"
-description = "Layer-based screen manager for Raspberry Pi and embedded Linux: persistent layers, compositing, and output to DRM/KMS"
+version = "0.2.2"
+description = "Layer-based screen manager for Raspberry Pi and embedded Linux: persistent layers, compositing or vector scenes, pointer input, output to DRM/KMS"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE", "NOTICE", "THIRD_PARTY_LICENSES.md"]
-authors = [{ name = "Carsten Bund", email = "carstenbund@gmail.com" }]
+# Split deliberately: setuptools maps a {name, email} pair to Author-email
+# alone and leaves the legacy Author header unset, so anything reading
+# Author (pypistats, some mirrors) reports "None".  Two entries fill both.
+authors = [
+    { name = "Carsten Bund" },
+    { email = "carstenbund@gmail.com" },
+]
 dependencies = ["numpy", "drm-display"]
 keywords = [
     "drm", "kms", "display", "framebuffer", "layers", "compositor",
