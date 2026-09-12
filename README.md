@@ -1,7 +1,7 @@
 # drm_screen
 
 Stateful screen manager. Owns persistent **layers**, composites them into a
-single frame, and pushes it to [`drm_display`](../drm_display).
+single frame, and pushes it to [`drm_display`](https://github.com/carstenbund/drm_display).
 
 Python package: `drm_screen`.
 
@@ -9,26 +9,29 @@ Python package: `drm_screen`.
 drm_composer  →  drm_screen  →  drm_display
  scene → cmds     layers →         frame →
                   composited       DRM/KMS
-                  frame            pixels
+                  or drawn         pixels
+                  as scenes
 ```
 
 - Owns layer state (named RGBA buffers: position, z, visibility, opacity)
 - Z-ordered alpha composition → one canvas
 - Exposes the command API that `drm_composer` targets
 - Dirty-flagged render loop
-- Chooses a **renderer**: numpy by default, a plugin where the platform has one
+- Chooses a **renderer**: numpy by default; a layer that holds primitives
+  rather than pixels needs a plugin that can draw them
 
 All buffers are **RGBA**; the single RGBA→BGRA conversion happens in the backend
 adapter just before `drm_display`. It does **not** parse HTML and does **not**
 touch DRM/KMS.
 
-See [outline.md](outline.md) for the design.
+See [outline.md](https://github.com/carstenbund/drm_screen/blob/main/outline.md) for the design.
 
 ## Renderers
 
 Composition is a choice now, not a fact. The numpy compositor above is the
-default and needs nothing extra; a plugin can take over the same layers and the
-same commands where a platform can do better:
+default and needs nothing extra; a plugin can take over the same layers where a
+platform can do better — and one command reaches further than the default can
+follow:
 
 | Renderer | Where it comes from | What it adds |
 |---|---|---|
@@ -41,8 +44,21 @@ ScreenService(renderer="lvgl")      # installed plugin, same commands
 DRM_SCREEN_RENDERER=lvgl python app.py    # an existing app, no code change
 ```
 
-See [docs/renderers.md](docs/renderers.md) for the protocol, the capability
-list, and how to write one.
+### `PlaceScene` needs a scene renderer
+
+Every other command works on any renderer.  `PlaceScene` — a layer holding
+primitives instead of pixels, which is what `drm_composer` emits for a layer of
+`<path>` elements — needs one that declares the `scene` capability.  The
+built-in RGBA compositor carries pixels only and raises `UnsupportedCommand`
+rather than rasterising the scene behind your back, so on a default install
+such a layer is an error, not a quietly different picture:
+
+```bash
+pip install drm-screen-lvgl
+```
+
+See [docs/renderers.md](https://github.com/carstenbund/drm_screen/blob/main/docs/renderers.md) for the protocol, the
+capability list, and how to write one.
 
 ## Install
 
@@ -69,8 +85,11 @@ Full stack, bootstrap, and integration demo:
 ## Changes
 
 ```
-0.2.1   Documentation: this release history, which the package had gone
-        without.
+0.2.1   Documentation.  PlaceScene needs a renderer with the `scene`
+        capability and the README did not say so -- it presented a plugin as
+        an upgrade for platforms that can do better, when one command is not
+        available without it at all.  Relative links, which 404 on PyPI
+        because the README is the project description.  This release history.
 0.2.0   Composition became a plugin point: a renderer is chosen rather than
         assumed, with the numpy compositor still the default and `lvgl` an
         installable alternative.  PlaceScene lets a layer hold primitives
@@ -84,9 +103,9 @@ Full stack, bootstrap, and integration demo:
 
 ## License
 
-**GPL-3.0-or-later** (see [LICENSE](LICENSE)). Use it freely under the GPL. For
+**GPL-3.0-or-later** (see [LICENSE](https://github.com/carstenbund/drm_screen/blob/main/LICENSE)). Use it freely under the GPL. For
 proprietary/closed use that cannot comply with the GPL, a separate commercial
 license is available — contact Carsten Bund <carstenbund@gmail.com>.
 
 Dependencies are permissive (BSD/MIT) and installed separately; their notices
-are in [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
+are in [THIRD_PARTY_LICENSES.md](https://github.com/carstenbund/drm_screen/blob/main/THIRD_PARTY_LICENSES.md).
