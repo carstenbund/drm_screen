@@ -69,6 +69,8 @@ Full stack, bootstrap, and integration demo:
 ## Changes
 
 ```
+0.2.1   Documentation: this release history, which the package had gone
+        without.
 0.2.0   Composition became a plugin point: a renderer is chosen rather than
         assumed, with the numpy compositor still the default and `lvgl` an
         installable alternative.  PlaceScene lets a layer hold primitives
