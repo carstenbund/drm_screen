@@ -1,5 +1,5 @@
 drm-screen
-Copyright (c) 2026 Carsten Bund <carstenbund@gmail.com>
+Copyright (c) 2026 Carsten Bund
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -10,4 +10,4 @@ This project depends on third-party open-source software installed separately;
 their copyright and license notices are listed in THIRD_PARTY_LICENSES.md.
 
 For commercial or proprietary use that cannot comply with the GPL, a separate
-commercial license is available — contact Carsten Bund <carstenbund@gmail.com>.
+commercial license is available — contact Carsten Bund via GitHub (https://github.com/carstenbund).

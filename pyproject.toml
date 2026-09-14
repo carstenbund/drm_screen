@@ -10,12 +10,9 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE", "NOTICE", "THIRD_PARTY_LICENSES.md"]
-# Split deliberately: setuptools maps a {name, email} pair to Author-email
-# alone and leaves the legacy Author header unset, so anything reading
-# Author (pypistats, some mirrors) reports "None".  Two entries fill both.
+# A name-only entry fills the Author header that pypistats and mirrors read.
 authors = [
     { name = "Carsten Bund" },
-    { email = "carstenbund@gmail.com" },
 ]
 dependencies = ["numpy", "drm-display"]
 keywords = [

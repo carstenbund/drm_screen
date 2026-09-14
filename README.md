@@ -109,7 +109,7 @@ Full stack, bootstrap, and integration demo:
 
 **GPL-3.0-or-later** (see [LICENSE](https://github.com/carstenbund/drm_screen/blob/main/LICENSE)). Use it freely under the GPL. For
 proprietary/closed use that cannot comply with the GPL, a separate commercial
-license is available — contact Carsten Bund <carstenbund@gmail.com>.
+license is available — contact Carsten Bund via GitHub (https://github.com/carstenbund).
 
 Dependencies are permissive (BSD/MIT) and installed separately; their notices
 are in [THIRD_PARTY_LICENSES.md](https://github.com/carstenbund/drm_screen/blob/main/THIRD_PARTY_LICENSES.md).
